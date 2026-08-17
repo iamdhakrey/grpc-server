@@ -1,0 +1,18 @@
+syntax = "proto3";
+package echo;
+
+service EchoService {
+  // Unary
+  rpc Ping (EchoRequest) returns (EchoResponse);
+  // Server Streaming
+  rpc StreamEcho (EchoRequest) returns (stream EchoResponse);
+}
+
+message EchoRequest {
+  string message = 1;
+}
+
+message EchoResponse {
+  string reply = 1;
+  int64 timestamp = 2;
+}
