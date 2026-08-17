@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use tokio::{sync::mpsc, time::sleep};
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{Request, Response, Status};
+use tonic::{Request, Response, Status, Streaming};
 
 pub mod hello_world {
     tonic::include_proto!("hello_world");
@@ -16,6 +16,7 @@ pub struct MyHelloWorldService {}
 #[tonic::async_trait]
 impl HelloService for MyHelloWorldService {
     type SayHelloStreamStream = ReceiverStream<Result<HelloResponse, Status>>;
+    type SayBothHelloStream = ReceiverStream<Result<HelloResponse, Status>>;
 
     async fn say_hello(
         &self,
@@ -52,6 +53,47 @@ impl HelloService for MyHelloWorldService {
                     break;
                 }
                 sleep(Duration::from_secs(1)).await;
+            }
+        });
+        Ok(Response::new(ReceiverStream::new(rx)))
+    }
+
+    async fn say_multiple_hello(
+        &self,
+        request: Request<Streaming<HelloRequest>>,
+    ) -> Result<Response<HelloResponse>, Status> {
+        let mut stream = request.into_inner();
+        let mut names = Vec::new();
+        while let Some(req) = stream.message().await? {
+            println!("Recied client stream items: {:?}", req.name);
+            names.push(req.name);
+        }
+
+        let reply = HelloResponse {
+            message: format!("Hello to all: {}!", names.join(", ")),
+        };
+
+        Ok(Response::new(reply))
+    }
+
+    async fn say_both_hello(
+        &self,
+        request: Request<Streaming<HelloRequest>>,
+    ) -> Result<Response<Self::SayBothHelloStream>, Status> {
+        let mut in_stream = request.into_inner();
+
+        let (tx, rx) = mpsc::channel(128);
+        tokio::spawn(async move {
+            while let Ok(Some(req)) = in_stream.message().await {
+                println!("Received biderectional stream item: {:?}", req.name);
+
+                let reply = HelloResponse {
+                    message: format!("Hello right back to you, {}!", req.name),
+                };
+                if tx.send(Ok(reply)).await.is_err() {
+                    println!("Client disconnected, stopping stream.");
+                    break;
+                }
             }
         });
         Ok(Response::new(ReceiverStream::new(rx)))

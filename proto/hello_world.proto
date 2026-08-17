@@ -6,6 +6,10 @@ service HelloService {
   rpc SayHello (HelloRequest) returns (HelloResponse);
   // Server Streaming
   rpc SayHelloStream (HelloRequest) returns (stream HelloResponse);
+
+  rpc SayMultipleHello(stream HelloRequest) returns (HelloResponse);
+
+  rpc SayBothHello(stream HelloRequest) returns (stream HelloResponse);
 }
 
 message HelloRequest {
