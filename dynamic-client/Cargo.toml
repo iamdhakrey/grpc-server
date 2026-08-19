@@ -1,0 +1,17 @@
+[package]
+name = "dynamic-client"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bytes = "1.12.1"
+http = "1.5.0"
+prost = "0.14.4"
+prost-reflect = { version = "0.16.5", features = ["serde"] }
+serde_json = "1.0.151"
+tonic = "0.14.6"
+tonic-reflection = "0.14.6"
+tonic-prost = "0.14.6"
+tokio-stream = "0.1.19"
+prost-types = "0.14.4"
+tokio = { version = "1.53.1", features = ["rt-multi-thread"] }

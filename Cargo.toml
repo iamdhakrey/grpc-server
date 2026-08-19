@@ -7,14 +7,16 @@ edition = "2024"
 members = ["dynamic-client"]
 resolver = "2"
 
+
+
 [dependencies]
 chrono = "0.4.45"
 prost = "0.14.4"
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }
 tokio-stream = "0.1.19"
+tonic-reflection = "0.14.6"
 tonic = "0.14.6"
 tonic-prost = "0.14.6"
-tonic-reflection = "0.14.6"
 
 [build-dependencies]
 tonic-build = "0.14.6"
